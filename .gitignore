@@ -60,5 +60,4 @@ lerna-debug.log*
 *.key
 *.mobileprovision
 *.tsbuildinfo
-*.docx
 
