@@ -1,7 +1,18 @@
 import axios from 'axios';
 
-// Base URL
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const DEFAULT_API_URL = 'http://localhost:5000/api';
+
+const normalizeApiUrl = (value?: string) => {
+    const trimmed = value?.trim().replace(/\/+$/, '');
+
+    if (!trimmed) {
+        return DEFAULT_API_URL;
+    }
+
+    return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+};
+
+const API_URL = normalizeApiUrl(import.meta.env.VITE_API_URL);
 
 const api = axios.create({
     baseURL: API_URL,
@@ -22,7 +33,7 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// Response Interceptor: HAndle 401 (Token Expired)
+// Response Interceptor: Handle 401 (Token Expired)
 api.interceptors.response.use(
     (response) => response,
     (error) => {
