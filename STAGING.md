@@ -21,9 +21,14 @@ Set these environment variables on Render:
 - `NODE_ENV=staging`
 - `MONGO_URI`: your MongoDB Atlas SRV connection string
 - `JWT_SECRET`: a long random secret
-- `CLIENT_URL`: your Vercel staging URL
-- Optional `CLIENT_URLS`: comma-separated allowed origins if you use multiple frontend domains
+- `CLIENT_URL`: your primary Vercel staging URL, with no trailing slash
+- Optional `CLIENT_URLS`: comma-separated allowed origins if you use multiple exact frontend domains
+- Optional `CLIENT_URL_PATTERNS`: comma-separated regex patterns for preview URLs when the exact hostname changes
 - Optional `MPESA_CALLBACK_URL`: `https://<your-render-service>.onrender.com/api/payments/mpesa/callback`
+
+Example preview pattern for `https://errands-beta.vercel.app` style URLs:
+
+`CLIENT_URL_PATTERNS=^https://errands(-[a-z0-9-]+)?\\.vercel\\.app$`
 
 A template is in `backend/.env.render.example`.
 

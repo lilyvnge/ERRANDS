@@ -7,10 +7,36 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 require('dotenv').config();
 
+const normalizeOrigin = (origin) => {
+    if (!origin) {
+        return '';
+    }
+
+    return origin.trim().replace(/\/+$/, '');
+};
+
+const parseOriginList = (value = '') => value
+    .split(',')
+    .map((origin) => normalizeOrigin(origin))
+    .filter(Boolean);
+
+const parseOriginPatterns = (value = '') => value
+    .split(',')
+    .map((pattern) => pattern.trim())
+    .filter(Boolean)
+    .flatMap((pattern) => {
+        try {
+            return [new RegExp(pattern)];
+        } catch (error) {
+            console.warn(`Ignoring invalid CLIENT_URL_PATTERNS entry: ${pattern}`);
+            return [];
+        }
+    });
+
 const configuredOrigins = [
-    process.env.CLIENT_URL,
-    ...(process.env.CLIENT_URLS || '').split(',').map((origin) => origin.trim()).filter(Boolean)
-];
+    normalizeOrigin(process.env.CLIENT_URL),
+    ...parseOriginList(process.env.CLIENT_URLS || '')
+].filter(Boolean);
 
 const allowedOrigins = Array.from(new Set([
     'http://localhost:3000',
@@ -18,8 +44,23 @@ const allowedOrigins = Array.from(new Set([
     'http://127.0.0.1:5173',
     'http://localhost:5174',
     ...configuredOrigins
-]));
+].map((origin) => normalizeOrigin(origin)).filter(Boolean)));
 
+const allowedOriginPatterns = parseOriginPatterns(process.env.CLIENT_URL_PATTERNS || '');
+
+const isAllowedOrigin = (origin) => {
+    const normalizedOrigin = normalizeOrigin(origin);
+
+    if (!normalizedOrigin) {
+        return true;
+    }
+
+    if (allowedOrigins.includes(normalizedOrigin)) {
+        return true;
+    }
+
+    return allowedOriginPatterns.some((pattern) => pattern.test(normalizedOrigin));
+};
 
 //Import routes
 const authRoutes = require('./routes/auth');
@@ -31,10 +72,9 @@ const paymentRoutes = require('./routes/payments');
 const adminRoutes = require('./routes/admin');
 const disputeRoutes = require('./routes/disputes');
 const notificationRoutes = require('./routes/notifications');
-const exportRoutes = require('./routes/export')
+const exportRoutes = require('./routes/export');
 const socketAuth = require('./middleware/socketAuth');
 const Conversation = require('./models/Conversation');
-
 
 // Debug: Check if routes are loaded
 // console.log('Auth Routes:', authRoutes);
@@ -48,9 +88,7 @@ const server = createServer(app);
 const io = new Server(server, {
     cors: {
         origin: function(origin, callback) {
-
-
-            if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            if (isAllowedOrigin(origin)) {
                 callback(null, true);
             } else {
                 callback(new Error('Not allowed by CORS'));
@@ -67,16 +105,11 @@ app.set('io', io);
 app.use(helmet());
 app.use(cors({
     origin: function(origin, callback) {
-        // List of allowed origins
-
-
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-        
-        if (allowedOrigins.indexOf(origin) !== -1) {
+        if (isAllowedOrigin(origin)) {
             callback(null, true);
         } else {
-            console.log('Blocked by CORS:', origin);
+            console.log('Blocked by CORS:', normalizeOrigin(origin));
+            console.log('Allowed CORS origins:', allowedOrigins);
             callback(new Error('Not allowed by CORS'));
         }
     },
@@ -115,72 +148,72 @@ io.on('connection', (socket) => {
     socket.join(`user_${socket.userId}`);
     io.emit('user_online', { userId: socket.userId });
 
-  // Join conversation room
-  socket.on('join_conversation', (conversationId) => {
-    socket.join(conversationId);
-    console.log(`User ${socket.id} joined conversation ${conversationId}`);
-  });
-
-  // Leave conversation room
-  socket.on('leave_conversation', (conversationId) => {
-    socket.leave(conversationId);
-    console.log(`User ${socket.id} left conversation ${conversationId}`);
-  });
-
-  // Send message
-  socket.on('send_message', async (data) => {
-    try {
-      const { conversationId, senderId, content, messageType = 'text', fileUrl } = data;
-
-      // Here you would typically:
-      // 1. Validate the sender has permission
-      // 2. Save message to database
-      // 3. Update conversation
-      // 4. Emit to other participants
-
-      // For now, we'll broadcast to the conversation room
-      socket.to(conversationId).emit('receive_message', {
-        conversationId,
-        senderId,
-        content,
-        messageType,
-        fileUrl,
-        timestamp: new Date()
-      });
-
-    } catch (error) {
-      console.error('Socket message error:', error);
-      socket.emit('message_error', { error: 'Failed to send message' });
-    }
-  });
-
-  // Typing indicators
-  socket.on('typing_start', (data) => {
-    socket.to(data.conversationId).emit('user_typing', {
-      userId: data.userId,
-      isTyping: true
+    // Join conversation room
+    socket.on('join_conversation', (conversationId) => {
+        socket.join(conversationId);
+        console.log(`User ${socket.id} joined conversation ${conversationId}`);
     });
-  });
 
-  socket.on('typing_stop', (data) => {
-    socket.to(data.conversationId).emit('user_typing', {
-      userId: data.userId,
-      isTyping: false
+    // Leave conversation room
+    socket.on('leave_conversation', (conversationId) => {
+        socket.leave(conversationId);
+        console.log(`User ${socket.id} left conversation ${conversationId}`);
     });
-  });
 
-  // Handle disconnect
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-    io.emit('user_offline', { userId: socket.userId });
-  });
+    // Send message
+    socket.on('send_message', async (data) => {
+        try {
+            const { conversationId, senderId, content, messageType = 'text', fileUrl } = data;
+
+            // Here you would typically:
+            // 1. Validate the sender has permission
+            // 2. Save message to database
+            // 3. Update conversation
+            // 4. Emit to other participants
+
+            // For now, we'll broadcast to the conversation room
+            socket.to(conversationId).emit('receive_message', {
+                conversationId,
+                senderId,
+                content,
+                messageType,
+                fileUrl,
+                timestamp: new Date()
+            });
+
+        } catch (error) {
+            console.error('Socket message error:', error);
+            socket.emit('message_error', { error: 'Failed to send message' });
+        }
+    });
+
+    // Typing indicators
+    socket.on('typing_start', (data) => {
+        socket.to(data.conversationId).emit('user_typing', {
+            userId: data.userId,
+            isTyping: true
+        });
+    });
+
+    socket.on('typing_stop', (data) => {
+        socket.to(data.conversationId).emit('user_typing', {
+            userId: data.userId,
+            isTyping: false
+        });
+    });
+
+    // Handle disconnect
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+        io.emit('user_offline', { userId: socket.userId });
+    });
 });
 
 // Health check route
 app.get('/api/health', (req, res) => {
     res.status(200).json({
         message: 'ERRANDS API is running!',
-        timestamp: new Date().toISOString(), 
+        timestamp: new Date().toISOString(),
         status: 'OK',
         routes: {
             auth: {
@@ -203,9 +236,8 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-
 app.get('/', (req, res) => {
-    res.status(200).json({ 
+    res.status(200).json({
         message: 'API is running',
         timestamp: new Date().toISOString()
     });
