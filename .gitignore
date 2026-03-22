@@ -60,6 +60,5 @@ lerna-debug.log*
 *.key
 *.mobileprovision
 *.tsbuildinfo
+*.docx
 
-LLM Prompt.docx
-api.docx
