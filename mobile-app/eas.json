@@ -1,0 +1,35 @@
+{
+  "cli": {
+    "version": ">= 7.5.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development-apk": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "environment": "development",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "environment": "preview",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "staging-apk": {
+      "extends": "preview"
+    },
+    "production": {
+      "environment": "production",
+      "android": {
+        "buildType": "app-bundle"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

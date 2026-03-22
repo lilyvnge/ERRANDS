@@ -1,0 +1,65 @@
+// Basic translation map for core UI strings
+export const translations = {
+  en: {
+    'nav.dashboard': 'Dashboard',
+    'nav.findVendors': 'Find Vendors',
+    'nav.postTask': 'Post a Task',
+    'nav.myTasks': 'My Tasks',
+    'nav.payments': 'Payments',
+    'nav.findTasks': 'Find Tasks',
+    'nav.myJobs': 'My Jobs',
+    'nav.earnings': 'Earnings',
+    'nav.verification': 'Verification',
+    'nav.admin': 'Admin',
+    'nav.message': 'Message',
+    'nav.profile': 'Profile',
+    'nav.signOut': 'Sign Out',
+    'chat.loading': 'Loading...',
+    'chat.title': 'Chat',
+    'chat.typing': 'Someone is typing...',
+    'chat.placeholder': 'Type a message...',
+    'chat.failedSend': 'Failed to send message'
+  },
+  sw: {
+    'nav.dashboard': 'Dashibodi',
+    'nav.findVendors': 'Tafuta Watoa Huduma',
+    'nav.postTask': 'Chapisha Kazi',
+    'nav.myTasks': 'Kazi Zangu',
+    'nav.payments': 'Malipo',
+    'nav.findTasks': 'Tafuta Kazi',
+    'nav.myJobs': 'Kazi Zangu',
+    'nav.earnings': 'Mapato',
+    'nav.verification': 'Uthibitisho',
+    'nav.admin': 'Utawala',
+    'nav.message': 'Ujumbe',
+    'nav.profile': 'Akaunti',
+    'nav.signOut': 'Toka',
+    'chat.loading': 'Inapakia...',
+    'chat.title': 'Soga',
+    'chat.typing': 'Mtu anaandika...',
+    'chat.placeholder': 'Andika ujumbe...',
+    'chat.failedSend': 'Imeshindwa kutuma ujumbe'
+  },
+  fr: {
+    'nav.dashboard': 'Tableau de bord',
+    'nav.findVendors': 'Trouver des prestataires',
+    'nav.postTask': 'Publier une tâche',
+    'nav.myTasks': 'Mes tâches',
+    'nav.payments': 'Paiements',
+    'nav.findTasks': 'Trouver des tâches',
+    'nav.myJobs': 'Mes missions',
+    'nav.earnings': 'Gains',
+    'nav.verification': 'Vérification',
+    'nav.admin': 'Admin',
+    'nav.message': 'Messages',
+    'nav.profile': 'Profil',
+    'nav.signOut': 'Déconnexion',
+    'chat.loading': 'Chargement...',
+    'chat.title': 'Chat',
+    'chat.typing': 'Quelqu’un est en train d’écrire...',
+    'chat.placeholder': 'Tapez un message...',
+    'chat.failedSend': 'Échec de l’envoi du message'
+  }
+} as const;
+
+export type SupportedLang = keyof typeof translations;

@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "ERRANDS",
+    "slug": "errands",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.errands.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "API_URL": "http://localhost:5000/api",
+      "eas": {
+        "projectId": "c02bdc28-8ad9-42e6-9db8-a6ee76fa9eec"
+      },
+      "EAS_PROJECT_ID": "c02bdc28-8ad9-42e6-9db8-a6ee76fa9eec"
+    }
+  }
+}

@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:4.4
+    container_name: errands-mongo
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+
+  api:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: errands-api
+    restart: unless-stopped
+    env_file:
+      - ../backend/.env.staging
+    environment:
+      NODE_ENV: staging
+    depends_on:
+      - mongo
+    ports:
+      - "5000:5000"
+
+  web:
+    build:
+      context: ../web-frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+    container_name: errands-web
+    restart: unless-stopped
+    env_file:
+      - ../web-frontend/.env.staging
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
+
+  ngrok:
+    image: ngrok/ngrok:alpine
+    container_name: errands-ngrok
+    restart: unless-stopped
+    depends_on:
+      - web
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+      NGROK_DOMAIN: ${NGROK_DOMAIN}
+    command: ["http", "--domain=${NGROK_DOMAIN}", "web:80"]
+    ports:
+      - "4041:4040"
+
+volumes:
+  mongo_data:
