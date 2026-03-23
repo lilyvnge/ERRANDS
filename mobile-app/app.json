@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ERRANDS",
-    "slug": "errands",
+    "name": "WERA",
+    "slug": "wera",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -30,9 +30,8 @@
     "extra": {
       "API_URL": "http://localhost:5000/api",
       "eas": {
-        "projectId": "c02bdc28-8ad9-42e6-9db8-a6ee76fa9eec"
-      },
-      "EAS_PROJECT_ID": "c02bdc28-8ad9-42e6-9db8-a6ee76fa9eec"
+        "projectId": "d0e7c38c-09d1-48db-8447-b8f63effd81b"
+      }
     }
   }
 }
